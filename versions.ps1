@@ -68,3 +68,10 @@ function Get-LatestSharePointVersion {
         return $versions | Where-Object Description -like "*$Version*"
     }
 }
+
+function Get-LatestServiceControlVersion {
+    # https://github.com/Particular/ServiceControl/tags
+    # https://api.github.com/repos/Particular/ServiceControl/tags
+    $response = Invoke-WebRequest -Uri 'https://api.github.com/repos/Particular/ServiceControl/tags'
+    return $response | ConvertFrom-Json | Where-Object name -match '[0-9.]+' | Select-Object -First 1 -Property @{Name='Version';Expression={$_.Name}},@{Name='Link';Expression={"https://github.com/Particular/ServiceControl/releases/tag/$($_.name)"}}
+}
