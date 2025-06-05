@@ -49,16 +49,16 @@ function Get-LatestSharePointVersion {
             # grab the data from the 2nd row containing the latest version data
             $data = [regex]::Matches($rows[1].Value, '<(th|td).*?>(?<data>.*?)<\/\1>','SingleLine')
             # groups 2 contain the data
-            $description = $data[0].groups['data'].Value.replace(' <br>','')
+            $description = [regex]::Matches($data[0].groups['data'].Value,'(SharePoint Server (?:Subscription Edition|\d{4}))')
             $hrefLink = $data[1].groups['data'].Value
-            $shortVersion = $data[2].groups['data'].Value
+            $shortVersion = [regex]::Matches($data[2].groups['data'].Value,'^[0-9.]+')
             $date = $data[3].groups['data'].Value
-            $data = [regex]::Matches($hrefLink,'(?<=a href=")(?<link>.*?)".*?>(?<description>.*)<\/a>')
+            $data = [regex]::Matches($hrefLink,'(?<=a href=")(?<link>.*?)".*?>(?<description>.*?)<\/a>')
             [PSCustomObject]@{
-                Description = $description
-                Version = $shortVersion
+                Description = $description[0].Groups[0].Value
+                Version = $shortVersion[0].Value
                 Date = $date
-                Link = $data[0].groups['link']
+                Link = $data | ForEach-Object { $_.groups['link'].value }
             }
         }
     }
